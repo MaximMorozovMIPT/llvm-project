@@ -320,6 +320,7 @@ enum {
   EM_BPF = 247,           // Linux kernel bpf virtual machine
   EM_VE = 251,            // NEC SX-Aurora VE
   EM_CSKY = 252,          // C-SKY 32-bit processor
+  EM_SIM = 253,           // SIM project arch
 };
 
 // Object file classes.
@@ -377,6 +378,16 @@ enum {
 };
 
 #define ELF_RELOC(name, value) name = value,
+
+// M88k relocations.
+enum {
+#include "ELFRelocs/Sim.def"
+};
+
+// SIM Specific e_flags
+enum : unsigned {
+  EF_SIM_ARCH = 0xf0000000,   // Do I need it?
+};
 
 // X86_64 relocations.
 enum {

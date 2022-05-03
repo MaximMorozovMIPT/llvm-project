@@ -827,6 +827,9 @@ void ScalarEnumerationTraits<ELFYAML::ELF_REL>::enumeration(
   case ELF::EM_68K:
 #include "llvm/BinaryFormat/ELFRelocs/M68k.def"
     break;
+  case ELF::EM_SIM:
+#include "llvm/BinaryFormat/ELFRelocs/Sim.def"
+    break;
   default:
     // Nothing to do.
     break;

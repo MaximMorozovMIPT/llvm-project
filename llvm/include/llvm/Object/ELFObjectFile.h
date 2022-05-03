@@ -1221,6 +1221,8 @@ StringRef ELFObjectFile<ELFT>::getFileFormatName() const {
       return "elf64-bpf";
     case ELF::EM_VE:
       return "elf64-ve";
+    case ELF::EM_SIM:
+      return "elf32-sim";
     default:
       return "elf64-unknown";
     }
@@ -1305,6 +1307,8 @@ template <class ELFT> Triple::ArchType ELFObjectFile<ELFT>::getArch() const {
     return Triple::ve;
   case ELF::EM_CSKY:
     return Triple::csky;
+  case ELF::EM_SIM:
+    return Triple::sim;
   default:
     return Triple::UnknownArch;
   }
