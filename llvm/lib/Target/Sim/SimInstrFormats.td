@@ -46,4 +46,12 @@ class SimInst<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>: 
   let AsmString   = asmstr;
   let Pattern     = pattern;
 
+  let Itinerary = NoItinerary;
+}
+
+// Pseudo instructions format
+class SimPseudoInst<dag outs, dag ins, string asmstr, list<dag> pattern>
+   : SimInst<0, outs, ins, asmstr, pattern> {
+  let isPseudo = 1;
+  let isCodeGenOnly = 1;
 }
