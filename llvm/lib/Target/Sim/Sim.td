@@ -16,26 +16,26 @@
 include "llvm/Target/Target.td"
 
 //===----------------------------------------------------------------------===//
-// Target-dependent interfaces
+// Register File, Calling Conv, Instruction Descriptions
 //===----------------------------------------------------------------------===//
 
 include "SimRegisterInfo.td"
-
-//===----------------------------------------------------------------------===//
-// Calling Conv, Instruction Descriptions
-//===----------------------------------------------------------------------===//
-
+include "SimCallingConv.td"
 include "SimInstrInfo.td"
-def SimInstrInfo : InstrInfo;
 
 //===----------------------------------------------------------------------===//
 // Sim processors supported.
 //===----------------------------------------------------------------------===//
 
-// Will generate SimGenAsmWrite.inc included by SimInstPrinter.cpp, contents
-//  as follows,
-// void SimInstPrinter::printInstruction(const MCInst *MI, raw_ostream &O) {...}
-// const char *SimInstPrinter::getRegisterName(unsigned RegNo) {...}
+def : Processor<"Sim", NoItineraries, []>;
+
+//===----------------------------------------------------------------------===//
+// Declare the target which we are implementing
+//===----------------------------------------------------------------------===//
+
+def SimInstrInfo : InstrInfo;
+
 def Sim : Target {
   let InstructionSet = SimInstrInfo;
+  let AllowRegisterRenaming = 1; // Maybe for future compatibility
 }
