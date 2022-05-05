@@ -32,7 +32,7 @@ def CC_Sim : CallingConv<[
 def RetCC_Sim : CallingConv<[
   // 32-bit values are returned in R2, 64-bit values in pair R2/R3.
   CCIfType<[i32], CCAssignToReg<[R9, R10]>>,
-  CCIfType<[i64], CCAssignToReg<[R9, R10, R11, R12]>>
+  CCIfType<[i64], CCAssignToReg<[R9, R10, R11, R12]>>,
   // CCIfType<[i32, i64], CCAssignToReg<[R9, R10, R11, R12]>> Is there any difference?
 
   // Alternatively, they are assigned to the stack in 4-byte aligned units.

@@ -162,7 +162,7 @@ class PatGprImm<SDPatternOperator OpNode, SimInst Inst, ImmLeaf ImmType>
 
 class PatBcc<CondCode Cond, SimInst Inst>
     : Pat<(SimBrCC GPR:$rs1, GPR:$rs2, Cond, bb:$imm16),
-          (Inst GPR:$rs1, GPR:$rs2, btarget16:$imm16)>;
+          (Inst GPR:$rs1, GPR:$rs2, BTARGET16:$imm16)>;
 
 //===----------------------------------------------------------------------===//
 // Instructions specific format
@@ -173,28 +173,28 @@ class PatBcc<CondCode Cond, SimInst Inst>
 // Category: Logical, arithmetic
 
 class SimInstRegImm<bits<8> opcode, string asmstr> : SimInst<opcode,
-                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $r1 $r2 $imm16", []]> {
-  let hasSideEffects = 0
+                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $r1 $r2 $imm16", []> {
+  let hasSideEffects = 0;
   let mayLoad = 0;
   let mayStore = 0;
 }
 
 class SimInstRegReg<bits<8> opcode, string asmstr> : SimInst<opcode,
-                      (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), asmstr # " $r1 $r2 $r3", []]> {
+                      (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), asmstr # " $r1 $r2 $r3", []> {
   bits<4> rs2;
 
   let Inst{15-12} = rs2;
   let Inst{11-0}  = 0;
 
-  let hasSideEffects = 0
+  let hasSideEffects = 0;
   let mayLoad = 0;
   let mayStore = 0;
 }
 
 // Category: Flow control.
 
-class CondBranch<bits<8> opcode, string asmstr, list<dag> pattern> : SimInst<opcode,
-                 (outs), (ins GPR:$rs1, GPR:$rs2, BTARGET16:$r3_imm), asmstr # " $r1 $r2 $r3_imm", []]> {
+class CondBranch<bits<8> opcode, string asmstr> : SimInst<opcode,
+                 (outs), (ins GPR:$rs1, GPR:$rs2, BTARGET16:$r3_imm), asmstr # " $r1 $r2 $r3_imm", []> {
 
   let hasSideEffects = 0;
   let mayLoad = 0;
@@ -222,7 +222,7 @@ def XOR : SimInstRegReg<0x43, "XOR">;  def : PatGprGpr<xor,  XOR>;
 def ADDi : SimInstRegImm<0x31, "ADDi">; def : PatGprImm<add, ADDi, SIMM16>;
 def SUBi : SimInstRegImm<0x32, "SUBi">; def : PatGprImm<sub, SUBi, SIMM16>;
 def MULi : SimInstRegImm<0x33, "MULi">; def : PatGprImm<mul, MULi, SIMM16>;
-def DIVi : SimInstRegImm<0x34, "DIVi">; def : PatGprImm<div, DIVi, SIMM16>;
+def DIVi : SimInstRegImm<0x34, "DIVi">; def : PatGprImm<sdiv, DIVi, SIMM16>;
 def ANDi : SimInstRegImm<0x51, "ANDi">; def : PatGprImm<and, ANDi, SIMM16>;
 def ORi  : SimInstRegImm<0x52, "ORi">;  def : PatGprImm<or,  ORi,  SIMM16>;
 def XORi : SimInstRegImm<0x53, "XORi">; def : PatGprImm<xor, XORi, SIMM16>;
@@ -232,23 +232,23 @@ def XORi : SimInstRegImm<0x53, "XORi">; def : PatGprImm<xor, XORi, SIMM16>;
 
 def MOV   : SimInst<0x10, (outs GPR:$rd), (ins GPR:$rs), "MOV $rd $rs", []> {
   let r3_imm = 0;
-  let isAsCheapAsAMove = 1
-  let isCodeGenOnly = 1
-  let isReMaterializable = 1
+  let isAsCheapAsAMove = 1;
+  let isCodeGenOnly = 1;
+  let isReMaterializable = 1;
 }
 def MOVli : SimInst<0x11, (outs GPR:$rd), (ins i32li16u:$imm16),
                        "MOVli $rd $imm16", [(set GPR:$rd, i32li16u:$imm16)]> {
   let r2 = 0;
-  let isAsCheapAsAMove = 1
-  let isCodeGenOnly = 1
-  let isReMaterializable = 1
+  let isAsCheapAsAMove = 1;
+  let isCodeGenOnly = 1;
+  let isReMaterializable = 1;
 }
 def MOVhi : SimInst<0x12, (outs GPR:$rd), (ins i32li16u:$imm16),
                        "MOVhi $rd $imm16", [(set GPR:$rd, i32li16u:$imm16)]> {
   let r2 = 0;
-  let isAsCheapAsAMove = 1
-  let isCodeGenOnly = 1
-  let isReMaterializable = 1
+  let isAsCheapAsAMove = 1;
+  let isCodeGenOnly = 1;
+  let isReMaterializable = 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -294,8 +294,8 @@ def BLR : SimInst<0x0, (outs GPR:$rd), (ins GPR:$rs1), "BLR $rd $rs1", []> {
 
 def BEQ  : CondBranch<0x06, "B.EQ">;  def : PatBcc<SETEQ, BEQ>;
 def BNE  : CondBranch<0x07, "B.NE">;  def : PatBcc<SETNE, BNE>;
-def BGT  : CondBranch<0x08, "B.GT">;  def : PatBcc<SETLE, BLE>;
-def BLE  : CondBranch<0x09, "B.LE">;  def : PatBcc<SETGT, BGT>;
+def BGT  : CondBranch<0x08, "B.GT">;  def : PatBcc<SETGT, BGT>;
+def BLE  : CondBranch<0x09, "B.LE">;  def : PatBcc<SETLE, BLE>;
 def BLEU : CondBranch<0x13, "B.LEU">; def : PatBcc<SETULE, BLEU>;
 def BGTU : CondBranch<0x14, "B.GTU">; def : PatBcc<SETUGT, BGTU>;
 
@@ -332,14 +332,14 @@ def LDi : SimInst<0x72, (outs GPR:$rd), (ins GPR:$rs1, SIMM16:$imm16),
 }
 
 // TODO: can it be replaced?
-def LDI_: SimInst<0x0, (outs GPR:$rd), (ins GPR:$rs1, SIMM16:$imm16),
-                        "LDi $rd $rs1 $imm16",
-                        []> {
-  let hasSideEffects = 0;
-  let mayLoad = 1;
-  let mayStore = 0;
-}
-def : Pat<(i32 (load ADDRrr:$rs1)), (LDI_ ADDRrr:$rd, 0)>;
+// def LDI_: SimInst<0x0, (outs GPR:$rd), (ins GPR:$rs1, SIMM16:$imm16),
+//                         "LDi $rd $rs1 $imm16",
+//                         []> {
+//   let hasSideEffects = 0;
+//   let mayLoad = 1;
+//   let mayStore = 0;
+// }
+def : Pat<(i32 (load ADDRrr:$rs1)), (LDi ADDRrr:$rs1, 0)>;
 
 //===----------------------------------------------------------------------===//
 // Stores
