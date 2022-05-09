@@ -296,8 +296,8 @@ def BEQ  : CondBranch<0x06, "B.EQ">;  def : PatBcc<SETEQ, BEQ>;
 def BNE  : CondBranch<0x07, "B.NE">;  def : PatBcc<SETNE, BNE>;
 def BGT  : CondBranch<0x08, "B.GT">;  def : PatBcc<SETGT, BGT>;
 def BLE  : CondBranch<0x09, "B.LE">;  def : PatBcc<SETLE, BLE>;
-def BLEU : CondBranch<0x13, "B.LEU">; def : PatBcc<SETULE, BLEU>;
-def BGTU : CondBranch<0x14, "B.GTU">; def : PatBcc<SETUGT, BGTU>;
+// def BLEU : CondBranch<0x13, "B.LEU">; def : PatBcc<SETULE, BLEU>;
+// def BGTU : CondBranch<0x14, "B.GTU">; def : PatBcc<SETUGT, BGTU>;
 
 //===----------------------------------------------------------------------===//
 // Support instr
