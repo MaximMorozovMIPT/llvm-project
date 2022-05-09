@@ -28,23 +28,26 @@ using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
 
+
+#define GET_INSTRUCTION_NAME
+#define PRINT_ALIAS_INSTR
 #include "SimGenAsmWriter.inc"
 
-void SimInstPrinter::printOperand(const MCInst *MI, uint64_t opNum, raw_ostream &OS) {
-  const MCOperand &MO = MI->getOperand(opNum);
+void SimInstPrinter::printOperand(const MCInst *MI, int OpNum, raw_ostream &O) {
+  const MCOperand &MO = MI->getOperand(OpNum);
 
   if (MO.isReg()) {
-    printRegName(OS, MO.getReg());
+    printRegName(O, MO.getReg());
     return;
   }
 
   if (MO.isImm()) {
-    OS << MO.getImm();
+    O << MO.getImm();
     return;
   }
 
   assert(MO.isExpr() && "Unknown operand kind in printOperand");
-  MO.getExpr()->print(OS, &MAI);
+  MO.getExpr()->print(O, &MAI);
 }
 
 void SimInstPrinter::printCCOperand(const MCInst *MI, int opNum,

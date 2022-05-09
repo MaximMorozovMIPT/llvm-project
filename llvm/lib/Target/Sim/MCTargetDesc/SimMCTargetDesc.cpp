@@ -10,7 +10,7 @@
 #include "SimMCTargetDesc.h"
 #include "SimInstPrinter.h"
 #include "SimMCAsmInfo.h"
-#include "TargetInfo/SimTargetInfo.h"
+#include "../TargetInfo/SimTargetInfo.h"
 
 #include "llvm/MC/MCDwarf.h"
 #include "llvm/MC/MCInstrInfo.h"

@@ -173,14 +173,14 @@ class PatBcc<CondCode Cond, SimInst Inst>
 // Category: Logical, arithmetic
 
 class SimInstRegImm<bits<8> opcode, string asmstr> : SimInst<opcode,
-                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $r1 $r2 $imm16", []> {
+                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $rd $rs1 $imm16", []> {
   let hasSideEffects = 0;
   let mayLoad = 0;
   let mayStore = 0;
 }
 
 class SimInstRegReg<bits<8> opcode, string asmstr> : SimInst<opcode,
-                      (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), asmstr # " $r1 $r2 $r3", []> {
+                      (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), asmstr # " $rd $rs1 $rs2", []> {
   bits<4> rs2;
 
   let Inst{15-12} = rs2;
@@ -194,7 +194,7 @@ class SimInstRegReg<bits<8> opcode, string asmstr> : SimInst<opcode,
 // Category: Flow control.
 
 class CondBranch<bits<8> opcode, string asmstr> : SimInst<opcode,
-                 (outs), (ins GPR:$rs1, GPR:$rs2, BTARGET16:$r3_imm), asmstr # " $r1 $r2 $r3_imm", []> {
+                 (outs), (ins GPR:$rs1, GPR:$rs2, BTARGET16:$r3_imm), asmstr # " $rs1 $rs2 $r3_imm", []> {
 
   let hasSideEffects = 0;
   let mayLoad = 0;

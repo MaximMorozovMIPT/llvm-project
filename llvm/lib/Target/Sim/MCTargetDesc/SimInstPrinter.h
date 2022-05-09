@@ -39,7 +39,7 @@ public:
                           unsigned OpNum, raw_ostream &OS);
 
   // Override MCInstPrinter.
-  void printRegName(raw_ostream &O, unsigned RegNo) const override;
+  void printRegName(raw_ostream &OS, unsigned RegNo) const override;
   void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                  const MCSubtargetInfo &STI, raw_ostream &O) override;
 };
