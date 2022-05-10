@@ -131,7 +131,7 @@ static void translateSetCCForBranch(const SDLoc &DL, SDValue &LHS, SDValue &RHS,
   }
 }
 
-SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
+SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) {
   SDValue CC = Op.getOperand(1);
   SDValue LHS = Op.getOperand(2);
   SDValue RHS = Op.getOperand(3);
@@ -147,8 +147,8 @@ SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   return DAG.getNode(SimISD::BR_CC, DL, Op.getValueType(), Op.getOperand(0), LHS, RHS, TargetCC, Block);
 }
 
-SDValue lowerFRAMEADDR(SDValue Op, SelectionDAG &DAG) const {
-  const SimRegisterInfo &RI = *Subtarget.getRegisterInfo();
+SDValue lowerFRAMEADDR(SDValue Op, SelectionDAG &DAG, const SimSubtarget *Subtarget) {
+  const SimRegisterInfo &RI = *Subtarget->getRegisterInfo();
   MachineFunction &MF = DAG.getMachineFunction();
   MachineFrameInfo &MFI = MF.getFrameInfo();
   MFI.setFrameAddressIsTaken(true);
@@ -164,8 +164,8 @@ SDValue lowerFRAMEADDR(SDValue Op, SelectionDAG &DAG) const {
 SDValue SimTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
     default: llvm_unreachable("Should not custom lower this!");
-    case ISD::FRAMEADDR:          return LowerFRAMEADDR(Op, DAG, Subtarget);
-    case ISD::BR_CC:              return LowerBR_CC(Op, DAG);
+    case ISD::FRAMEADDR:          return lowerFRAMEADDR(Op, DAG, &Subtarget);
+    case ISD::BR_CC:              return lowerBR_CC(Op, DAG);
   }
 }
 
@@ -195,10 +195,6 @@ SDValue SimTargetLowering::PerformDAGCombine(SDNode *Node, DAGCombinerInfo &DCI)
   return SDValue();
 }
 
-bool mayBeEmittedAsTailCall(const CallInst *CI) const {
-    return false;
-}
-
 //===----------------------------------------------------------------------===//
 // Calling conventions
 //===----------------------------------------------------------------------===//
@@ -207,7 +203,7 @@ bool mayBeEmittedAsTailCall(const CallInst *CI) const {
 // values.
 static SDValue convertLocVTToValVT(SelectionDAG &DAG, SDValue Val,
                                    const CCValAssign &VA, const SDLoc &DL,
-                                   const RISCVSubtarget &Subtarget) {
+                                   const SimSubtarget &Subtarget) {
   switch (VA.getLocInfo()) {
   default:
     llvm_unreachable("Unexpected CCValAssign::LocInfo");
@@ -225,7 +221,7 @@ static SDValue convertLocVTToValVT(SelectionDAG &DAG, SDValue Val,
 // riscv copy
 static SDValue unpackFromRegLoc(SelectionDAG &DAG, SDValue Chain,
                                 const CCValAssign &VA, const SDLoc &DL,
-                                const USimTargetLowering &TLI) {
+                                const SimTargetLowering &TLI) {
   MachineFunction &MF = DAG.getMachineFunction();
   MachineRegisterInfo &RegInfo = MF.getRegInfo();
   EVT LocVT = VA.getLocVT();
@@ -286,8 +282,8 @@ SDValue SimTargetLowering::LowerFormalArguments(
   }
 
   MachineFunction &MF = DAG.getMachineFunction();
-  EVT PtrVT = getPointerTy(DAG.getDataLayout());
-  unsigned StackSlotSize = MVT(MVT::i32).getSizeInBits() / 8;
+  // EVT PtrVT = getPointerTy(DAG.getDataLayout());
+  // unsigned StackSlotSize = MVT(MVT::i32).getSizeInBits() / 8;
   // Used with vargs to acumulate store chains.
   std::vector<SDValue> OutChains;
 
@@ -326,8 +322,7 @@ SDValue SimTargetLowering::LowerFormalArguments(
 }
 
 static SDValue convertValVTToLocVT(SelectionDAG &DAG, SDValue Val,
-                                   const CCValAssign &VA, const SDLoc &DL,
-                                   const USimSubtarget &Subtarget) {
+                                   const CCValAssign &VA, const SDLoc &DL) {
   EVT LocVT = VA.getLocVT();
 
   if (VA.getValVT() == MVT::f32)
@@ -377,7 +372,7 @@ SDValue SimTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
     // Make the return register live on exit.
     assert(VA.isRegLoc() && "Can only return in registers!");
 
-    SDValue Arg = convertValVTToLocVT(DAG, OutVals[i], VA, DL);
+    SDValue Arg = convertValVTToLocVT(DAG, OutVals[I], VA, DL);
     
     Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), Arg, Glue);
 
@@ -534,7 +529,7 @@ SDValue SimTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   }
 
   // Add a register mask operand representing the call-preserved registers.
-  const SimRegisterInfo *TRI = Subtarget->getRegisterInfo();
+  const SimRegisterInfo *TRI = Subtarget.getRegisterInfo();
   const uint32_t *Mask =
       TRI->getRTCallPreservedMask(CallConv);
   assert(Mask && "Missing call preserved mask for calling convention");
@@ -578,12 +573,12 @@ SDValue SimTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   return Chain;
 }
 
-bool USimTargetLowering::CanLowerReturn(
+bool SimTargetLowering::CanLowerReturn(
     CallingConv::ID CallConv, MachineFunction &MF, bool IsVarArg,
     const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext &Context) const {
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, Context);
-  if (!CCInfo.CheckReturn(Outs, RetCC_USim))
+  if (!CCInfo.CheckReturn(Outs, RetCC_Sim))
     return false;
   if (CCInfo.getNextStackOffset() != 0 && IsVarArg)
     llvm_unreachable("CanLowerReturn what?"); 

@@ -54,9 +54,12 @@ public:
   void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,//
                             RegScavenger *RS = nullptr) const override;
 private:
-  void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,//
-                 const DebugLoc &DL, Register DestReg, Register SrcReg,
-                 int64_t Val, MachineInstr::MIFlag Flag) const;
+  void adjustReg(MachineBasicBlock &MBB,
+                  MachineBasicBlock::iterator MBBI,
+                  int64_t Val,
+                  MachineInstr::MIFlag Flag,
+                  Register DestReg,
+                  Register SrcReg ) const;
 
   bool isLeafProc(MachineFunction &MF) const;//
 

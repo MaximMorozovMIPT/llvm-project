@@ -76,7 +76,7 @@ void SimFrameLowering::emitPrologue(MachineFunction &MF,
     SimMachineFunctionInfo *FuncInfo = MF.getInfo<SimMachineFunctionInfo>();
 
     MachineFrameInfo &MFI = MF.getFrameInfo();
-    const SimRegisterInfo &RegInfo = STI.getRegisterInfo();
+    const SimRegisterInfo &RegInfo = *static_cast<const SimRegisterInfo *>(STI.getRegisterInfo());
     MachineBasicBlock::iterator MBBI = MBB.begin();
   
     // Debug location must be unknown since the first debug location is used
@@ -173,22 +173,6 @@ eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
 // Let eliminateCallFramePseudoInstr preserve stack space for it.
 bool SimFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const {
     return !MF.getFrameInfo().hasVarSizedObjects();
-}
-
-static bool isFrameIndexInCalleeSavedRegion(const MachineFrameInfo &MFI,
-                                            int FI) {
-  // Callee-saved registers should be referenced relative to the stack
-  // pointer (positive offset), otherwise use the frame pointer (negative
-  // offset).
-  const auto &CSI = MFI.getCalleeSavedInfo();
-  int MinCSFI = 0;
-  int MaxCSFI = -1;
-  if (CSI.size()) {
-    MinCSFI = CSI[0].getFrameIdx();
-    MaxCSFI = CSI[CSI.size() - 1].getFrameIdx();
-  }
-
-  return (FI >= MinCSFI && FI <= MaxCSFI);
 }
 
 bool SimFrameLowering::isLeafProc(MachineFunction &MF) const

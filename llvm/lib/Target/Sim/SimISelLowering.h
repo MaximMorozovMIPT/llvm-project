@@ -39,6 +39,7 @@ private:
     const SimSubtarget &Subtarget;
 
 public:
+    SimSubtarget const &getSubtarget() const { return Subtarget; }
     explicit SimTargetLowering(const TargetMachine &TM, const SimSubtarget &STI); //supp
 
     // Override TargetLowering methods.
@@ -80,7 +81,9 @@ public:
     SDValue LowerCall(CallLoweringInfo &CLI, SmallVectorImpl<SDValue> &InVals) const override; //supp
 
     // riscv copy
-    bool mayBeEmittedAsTailCall(const CallInst *CI) const override; //supp
+    bool mayBeEmittedAsTailCall(const CallInst *CI) const override { //supp
+      return false;
+    } 
 };
 
 } // end namespace llvm
