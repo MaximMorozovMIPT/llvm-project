@@ -34,7 +34,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSimTarget() {
   RegisterTargetMachine<SimTargetMachine> X(getTheSimTarget());
 }
 
-namespace {
 std::string computeDataLayout() {
   std::string Ret;
 
@@ -48,7 +47,7 @@ std::string computeDataLayout() {
   Ret += "-p:32:32";
 
   // Make sure that global data has at least 32 bits of alignment by default.
-  Ret += "-i1:8:32 -i8:8:32 -i16:16:32 -i32:32:32";
+  Ret += "-i1:8:32-i8:8:32-i16:16:32-i32:32:32";
 
   // 64-bit integers are aligned only to 32 bits.
   Ret += "-i64:32";
@@ -70,7 +69,9 @@ Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
   return RM.getValueOr(Reloc::Static);
 }
 
-} // namespace
+static CodeModel::Model getEffectiveSimCodeModel() {
+  return CodeModel::Small;
+}
 
 /// Create an Sim architecture model
 SimTargetMachine::SimTargetMachine(const Target &T, const Triple &TT,
@@ -81,8 +82,8 @@ SimTargetMachine::SimTargetMachine(const Target &T, const Triple &TT,
                                      CodeGenOpt::Level OL, bool JIT)
     : LLVMTargetMachine(T, computeDataLayout(), TT, CPU, FS, Options,
                         getEffectiveRelocModel(RM),
-                        getEffectiveCodeModel(CM, CodeModel::Small), OL),
-      TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
+                        getEffectiveSimCodeModel(), OL),
+      TLOF(std::make_unique<SimTargetObjectFile>()),
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
   initAsmInfo();
 }
