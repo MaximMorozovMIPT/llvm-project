@@ -156,9 +156,9 @@ class PatGpr<SDPatternOperator OpNode, SimInst Inst>
 class PatGprGpr<SDPatternOperator OpNode, SimInst Inst>
     : Pat<(OpNode GPR:$rs1, GPR:$rs2), (Inst GPR:$rs1, GPR:$rs2)>;
     
-class PatGprImm<SDPatternOperator OpNode, SimInst Inst, ImmLeaf ImmType>
-    : Pat<(i32 (OpNode (i32 GPR:$rs1), ImmType:$imm)),
-          (Inst GPR:$rs1, ImmType:$imm)>;
+// class PatGprImm<SDPatternOperator OpNode, SimInst Inst, ImmLeaf ImmType>
+//     : Pat<(i32 (OpNode (i32 GPR:$rs1), ImmType:$imm)),
+//           (Inst GPR:$rs1, ImmType:$imm)>;
 
 class PatBcc<CondCode Cond, SimInst Inst>
     : Pat<(SimBrCC GPR:$rs1, GPR:$rs2, Cond, bb:$imm16),
@@ -172,8 +172,8 @@ class PatBcc<CondCode Cond, SimInst Inst>
 
 // Category: Logical, arithmetic
 
-class SimInstRegImm<bits<8> opcode, string asmstr> : SimInst<opcode,
-                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $rd $rs1 $imm16", []> {
+class SimInstRegImm<bits<8> opcode, string asmstr, list<dag> pattern> : SimInst<opcode,
+                    (outs GPR:$rd), (ins GPR:$rs1, GPR:$imm16), asmstr # " $rs1 $rd $imm16", pattern> {
   let hasSideEffects = 0;
   let mayLoad = 0;
   let mayStore = 0;
@@ -219,13 +219,14 @@ def OR  : SimInstRegReg<0x41, "OR">;   def : PatGprGpr<or,   OR>;
 def AND : SimInstRegReg<0x42, "AND">;  def : PatGprGpr<and,  AND>;
 def XOR : SimInstRegReg<0x43, "XOR">;  def : PatGprGpr<xor,  XOR>;
 
-def ADDi : SimInstRegImm<0x31, "ADDi">; def : PatGprImm<add, ADDi, SIMM16>;
-def SUBi : SimInstRegImm<0x32, "SUBi">; def : PatGprImm<sub, SUBi, SIMM16>;
-def MULi : SimInstRegImm<0x33, "MULi">; def : PatGprImm<mul, MULi, SIMM16>;
-def DIVi : SimInstRegImm<0x34, "DIVi">; def : PatGprImm<sdiv, DIVi, SIMM16>;
-def ANDi : SimInstRegImm<0x51, "ANDi">; def : PatGprImm<and, ANDi, SIMM16>;
-def ORi  : SimInstRegImm<0x52, "ORi">;  def : PatGprImm<or,  ORi,  SIMM16>;
-def XORi : SimInstRegImm<0x53, "XORi">; def : PatGprImm<xor, XORi, SIMM16>;
+def ADDi : SimInstRegImm<0x31, "ADDi", [(set GPR:$rd, (add GPR:$rs1, SIMM16:$imm16))]>; 
+def SUBi : SimInstRegImm<0x32, "SUBi", [(set GPR:$rd, (sub GPR:$rs1, SIMM16:$imm16))]>; 
+def MULi : SimInstRegImm<0x33, "MULi", [(set GPR:$rd, (mul GPR:$rs1, SIMM16:$imm16))]>; 
+def DIVi : SimInstRegImm<0x34, "DIVi", [(set GPR:$rd, (sdiv GPR:$rs1, SIMM16:$imm16))]>; 
+def ANDi : SimInstRegImm<0x51, "ANDi", [(set GPR:$rd, (and GPR:$rs1, SIMM16:$imm16))]>; 
+def ORi  : SimInstRegImm<0x52, "ORi", [(set GPR:$rd, (or GPR:$rs1, SIMM16:$imm16))]>;  
+def XORi : SimInstRegImm<0x53, "XORi", [(set GPR:$rd, (xor GPR:$rs1, SIMM16:$imm16))]>; 
+
 
 //===----------------------------------------------------------------------===//
 // Moves
