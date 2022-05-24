@@ -41,6 +41,7 @@
 #include "clang/Basic/Diagnostic.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/Triple.h"
+#include "Targets/Sim.h"
 
 using namespace clang;
 
@@ -644,7 +645,11 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
 
   case llvm::Triple::ve:
     return new LinuxTargetInfo<VETargetInfo>(Triple, Opts);
+
+  case llvm::Triple::sim:
+    return new SimTargetInfo(Triple, Opts);
   }
+  
 }
 } // namespace targets
 } // namespace clang
